@@ -8,6 +8,8 @@ Clone the repository
 
     git clone https://github.com/Udanie-sys/PokemonInformationProject.git
 
+Import the database available in the Pokemon_Db_Backup folder.
+
 Switch to the repo folder
 
     cd C:\PokemonProject\Pokemon
