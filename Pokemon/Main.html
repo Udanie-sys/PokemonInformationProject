@@ -1,0 +1,326 @@
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/cupertino/jquery-ui.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/js/jquery.jqgrid.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <style>
+    /* Set height of the grid */
+    .row.content {
+      height: 1000px
+    }
+
+    .sidenav {
+      background-color: #f1f1f1;
+      height: 100%;
+    }
+
+    
+    .ui-pg-table {
+      height: 20px;
+    }
+
+
+    footer {
+      background-color: #555;
+      color: white;
+      padding: 15px;
+      width: 100%;
+    }
+
+
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        height: auto;
+        padding: 15px;
+      }
+
+      .row.content {
+        height: auto;
+      }
+    }
+
+    body {
+      line-height: 2.1;
+      font-size: 20px;
+    }
+
+    .ui-jqgrid>.ui-jqgrid-view {
+
+      font-size: 15px !important;
+
+    }
+
+    .ui-jqgrid tr.jqgrow td {
+      word-wrap: break-word;
+      /* IE 5.5+ and CSS3 */
+      white-space: pre-wrap;
+      /* CSS3 */
+      white-space: -moz-pre-wrap;
+      /* Mozilla, since 1999 */
+      white-space: -pre-wrap;
+      /* Opera 4-6 */
+      white-space: -o-pre-wrap;
+      /* Opera 7 */
+      overflow: hidden;
+      height: auto;
+      vertical-align: middle;
+      padding-top: 3px;
+      padding-bottom: 3px
+    }
+  </style>
+  <script>
+    function showInput() {
+      document.getElementById('lblMessage').innerHTML = "Successfully Uploaded!";
+    }
+    $(document).ready(function () {
+
+      var $form = $('form');
+      $form.submit(function () {
+        $.post($(this).attr('action'), $(this).serialize(), function (response) {
+          alert('adsf');
+        }, 'json');
+        return false;
+      });
+
+
+
+      $("#btnLoadData").click(function () {
+        fetchDataToGrid('pokemons');
+      });
+
+      function fetchDataToGrid(actionName) {
+        $.ajax({
+          url: "http://localhost:8090/api/" + actionName,
+          type: 'GET',
+          success: function (res) {
+            //unload first to create new object
+            $('#grdPokemon').jqGrid('GridUnload');
+            $('#pager2').css('height', '20px');
+            generateGrid(res);
+            console.log(res);
+          }
+        });
+      }
+
+
+      //Upload Data
+      function generateGrid(myjsondata) {
+        $("#grdPokemon").jqGrid({
+          datastr: myjsondata,
+          datatype: "jsonstring",
+          colNames: ['Favourite Pokemon', 'id', 'name', 'classification', 'types', 'resistant', 'weaknesses', 'minimumWeight', 'maximumWeight', 'minimumHeight',
+            'maximumHeight', 'fleeRate', 'evolutionRequirementsName', 'evolutionRequirementsAmount', 'maxCP', 'maxHP'],
+          colModel: [
+            {
+              name: 'favourite', id: 'favourite', index: 'favourite',
+              editable: true, edittype: 'checkbox', editoptions: { value: "True:False" },
+              formatter: "checkbox", formatoptions: { disabled: false }, width: 90
+            },
+            { name: 'id', index: 'id', width: 55, sortable: true },
+            { name: 'name', index: 'name', width: 60, sortable: true },
+            { name: 'classification', index: 'classification', width: 55 },
+            { name: 'types_name', index: 'types_name', width: 60, sortable: false },
+            { name: 'resistant', index: 'resistant', width: 90 },
+            { name: 'weaknesses', index: 'weaknesses', width: 60, sortable: false },
+            { name: 'minimumWeight', index: 'minimumWeight', width: 100 },
+            { name: 'maximumWeight', index: 'maximumWeight', width: 99, sortable: false },
+            { name: 'minimumHeight', index: 'minimumHeight', width: 99 },
+            { name: 'maximumHeight', index: 'maximumHeight', width: 99, sortable: false },
+            { name: 'fleeRate', index: 'fleeRate', width: 55 },
+            { name: 'EvolutionRequirementsName', index: 'EvolutionRequirementsName', width: 60, sortable: false },
+            { name: 'EvolutionRequirementsAmount', index: 'EvolutionRequirementsAmount', width: 55 },
+            { name: 'maxCP', index: 'maxCP', width: 60, sortable: false },
+            { name: 'maxHP', index: 'maxHP', width: 60, sortable: false },
+          ],
+          rowNum: 10,
+          loadonce: true,
+          pager: '#pager2',
+          sortname: 'name',
+          viewrecords: true,
+          sortorder: "asc",
+          caption: "",
+          width: "1500",
+
+        });
+        jQuery("#grdPokemon").jqGrid('filterToolbar', { stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
+
+      }
+      // Search pokemon data by name
+      $("#btnLoadSearchData").click(function () {
+
+        var nameValue = $('#txtName').val();
+        //  Fetch the text from  <input> control
+
+        // pass a new search filter to jqGrid
+        var f = { groupOp: "AND", rules: [] };
+
+        //Grid column to search
+        f.rules.push({ field: "name", op: "cn", data: nameValue });
+
+        var grid = $('#grdPokemon');
+        grid[0].p.search = f.rules.length > 0;
+        $.extend(grid[0].p.postData, { filters: JSON.stringify(f) });
+        grid.trigger("reloadGrid", [{ page: 1 }]);
+
+      });
+      //Search pokemons by ID
+      $("#btnLoadSearchID").click(function () {
+
+        var idValue = $('#txtId').val();
+
+        // pass a new search filter to jqGrid
+        var f = { groupOp: "AND", rules: [] };
+
+        f.rules.push({ field: "id", op: "cn", data: idValue });
+
+        var grid = $('#grdPokemon');
+        grid[0].p.search = f.rules.length > 0;
+        $.extend(grid[0].p.postData, { filters: JSON.stringify(f) });
+        grid.trigger("reloadGrid", [{ page: 1 }]);
+
+
+      });
+      //Get all favourite pokemons
+      $("#btnFavouritePokemon").click(function () {
+
+        fetchDataToGrid('favouritePokemons');
+
+      });
+
+
+      //Get all Pokemon Types
+      $("#btnPokemonTypes").click(function () {
+
+        $('#grdPokemon').jqGrid('GridUnload');
+        $('#pager2').css('height', '20px');
+        $("#grdPokemon").jqGrid({
+          url: 'http://localhost:8090/api/pokemonTypes',
+          datatype: "json",
+          colNames: ['Pokemon Types'],
+          colModel: [
+            { name: 'name', index: 'name', width: 60, sortable: true }
+          ],
+          rowNum: 50,
+          loadonce: true,
+          //pager: '#pager3',
+          pager: '#pager2',
+          sortname: 'name',
+          viewrecords: true,
+          sortorder: "asc",
+          caption: "",
+          width: "500"
+        });
+
+      });
+
+      //Change favourite pokemons
+      $(document).delegate('#grdPokemon .jqgrow td input', 'click', function () {
+
+        var checkedNames = '';
+        var checkedId = 0;
+        debugger;
+
+        var rowId = $("#grdPokemon").jqGrid('getGridParam', 'selrow');
+        var rowData = jQuery("#grdPokemon").getRowData(rowId);
+        checkedId = rowData['id']; // perticuler Column name of jqgrid want to access
+        checkedNames = rowData['favourite'];
+        $("#grdPokemon").jqGrid('resetSelection');
+
+        $.ajax({
+          url: "http://localhost:8090/api/favourite",
+          type: 'POST',
+          data: { id: checkedId, status: checkedNames },
+          success: function (res) {
+            // can add alert or any message here if needed
+          }
+        });
+
+      });
+
+
+      $("#grdPokemon").jqGrid('navGrid', '#pager2', { edit: true, add: true, del: false });
+    });
+
+  </script>
+</head>
+
+<body>
+  <div class="center" style="padding-left:505px;">
+    <h1 style="color:rgba(33, 87, 187, 0.897) ;"><b>Pokemon Information</b></h1>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row content">
+      <div class="col-sm-3 sidenav">
+        <h4></h4>
+        <ul class="nav nav-pills nav-stacked">
+          <br />
+          <input type="button" class="btn btn-primary" id="btnLoadData" value="View All Data">
+          <br /><br />
+          <input type="button" class="btn btn-primary" id="btnFavouritePokemon" value="View Favourite Pokemons">
+          <br /><br />
+          <input type="button" class="btn btn-primary" id="btnPokemonTypes" value="View Pokemon Types">
+
+        </ul><br>
+
+      </div>
+
+      <div class="col-sm-9">
+        <hr>
+        <h3>Upload JSON File</h3>
+        <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+        <form id="frmUpload" action="http://localhost:8090/api/upload" method="post" enctype="multipart/form-data"
+          target="dummyframe">
+
+          <input type="file" class="form-control" name="fileupload" style="width: 25%;">
+
+          <input type="submit" class="btn btn-secondary" onclick="showInput();" value="Upload Data"
+            style="margin-top:20px;">
+        </form>
+        <label id="lblMessage"></label>
+        <hr>
+        <hr>
+        <div class="col-sm-3"><input type="text" id="txtName" class="form-control" placeholder="Search By Name.."
+            style="width: 100%;"></div>
+        <div class="col-sm-1"><input type="button" class="btn btn-secondary" id="btnLoadSearchData" value="Search Name">
+        </div>
+        <br />
+        <div class="col-sm-3"><input type="text" id="txtId" class="form-control" placeholder="Search By ID.."
+            style="width: 100%;"></div>
+        <div class="col-sm-1"><input type="button" class="btn btn-secondary" id="btnLoadSearchID" value="Search ID">
+        </div>
+        <br />
+
+        <p id="dvShowData">
+
+        </p>
+
+        <br />
+        <table id="grdPokemon" class="display" cellspacing="0" width="400px;">
+        </table>
+        <div id="pager2" style="height: 20px;" class="change-width"></div>
+
+      
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="container-fluid">
+    <p style="font-size:11px;text-align:center; ">Copyright © 2022 Pokemon
+
+    </p>
+  </footer>
+
+
+
+</body>
+
+</html>
