@@ -29,5 +29,5 @@ Make sure TCP/IP protocol enable in the SQL server network configuration (Click 
 
 Right click TCP/IP and click properties then set the TCP port to 8090
 
-### More Information available in the pokemon information documentation (Pokemon Information Documentation v0.1.pdf)
+### More Information is available in the pokemon information documentation (Pokemon Information Documentation v0.1.pdf)
 
