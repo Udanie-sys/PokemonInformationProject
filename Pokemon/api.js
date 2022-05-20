@@ -94,9 +94,12 @@ router.route('/upload').post((request, response) => {
         //Create an instance of the form object
         let form = new formidable.IncomingForm();
         var finalResult = null;
+        let filename="pokemons.json";
+        const templatePath = path.join(__dirname, '/../Pokemon');
+        const filepath=templatePath+"\\"+ filename;
 
-
-        fs.readFile("C:\\PokemonProject\\Pokemon\\pokemons.json", "utf8", (err, response) => {
+		fs.readFile(filepath, "utf8", (err, response) => {
+    
 
             console.log('inside pokemone data loading');
             console.log(request.file);
